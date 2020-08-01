@@ -28,6 +28,7 @@ class Juno{
     private $clientSecret    = null;
     private $sandbox         = false;
 
+    public $discountAmount  = 0;        // Juros ao mês [ 0.00 até 20.00 ]
     public $interest        = 0;        // Juros ao mês [ 0.00 até 20.00 ]
     public $fine            = 0;        // Multa de pagamento após o vencimento [ 0.00 até 20.00 ]
     public $notify          = false;    // Permitir Juno notificar o cliente [ TRUE = PERMITIR / FALSE = BLOQUEIA ]
@@ -84,6 +85,11 @@ class Juno{
                     'description'   =>  $this->description,
                     'amount'        =>  $this->amount,
                     'dueDate'       =>  $this->dueDate,
+                    'discountAmount'=>  $this->discountAmount,
+                    'interest'      =>  $this->interest,
+                    'fine'          =>  $this->fine,
+                    'notify'        =>  $this->notify,
+                    'maxOverdueDays'=>  $this->maxOverdueDays,
                     'paymentTypes'  => array('BOLETO'),
                 ],
                 'billing' => [
