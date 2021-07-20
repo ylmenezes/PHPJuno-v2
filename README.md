@@ -1,4 +1,4 @@
-# Juno PHP Versão 2
+# PHP Juno Versão 2
 
 Classe PHP para auxiliar integração na API da Juno
 
