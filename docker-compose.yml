@@ -1,22 +1,9 @@
-version: "3.3"
-
+version: '3.2'
 services:
-  php73:
-    image: "php:7.3-apache"
-    ports:
-      - "8082-8089:80"
-    volumes:
-      - ".:/var/www/html"
-      - "./acme.json:/acme.json" # touch acme.json chmod 600 acme.json
-    networks:
-      - web
-    labels:
-      - "traefik.http.routers.php73_apache.rule=Host(`dna-juno.ciaweb.dev.br`)"
-      - "traefik.http.routers.php73_apache.entrypoints=websecure"
-      - "traefik.http.routers.php73_apache.tls=true"
-      - "traefik.http.routers.php73_apache.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.php73_apache.middlewares=authphp"
-      - "traefik.http.middlewares.authphp.basicauth.users=ylmenezes:$$2y$$05$$9u2o1h014PGmj1GYFLHfhOh92O1sQIXF85xP69dqspEh3gO1Vt98."
-networks:
-  web:
-    external: true
+    apache:
+        build: .
+        container_name: juno
+        ports:
+            - "88:80"
+        volumes:
+            - .:/var/www/html
