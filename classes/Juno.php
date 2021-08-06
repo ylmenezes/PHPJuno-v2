@@ -28,6 +28,9 @@ class Juno{
     private $clientSecret    = null;
     private $sandbox         = false;
 
+    private $dt_ini         = null;
+    private $dt_fim         = null;
+
     public $discountAmount  = 0;        // Juros ao mês [ 0.00 até 20.00 ]
     public $interest        = 0;        // Juros ao mês [ 0.00 até 20.00 ]
     public $fine            = 0;        // Multa de pagamento após o vencimento [ 0.00 até 20.00 ]
@@ -70,7 +73,51 @@ class Juno{
         $this->sandbox      = $sandbox;
         $this->token_base64 = base64_encode($this->clientID.':'.$this->clientSecret);
         $this->token_access = $this->auth();
+
+        $this->dt_ini = date('Y-m-01');
+        $this->dt_fim = date('Y-m-t');
     }
+
+    /**
+     * Listar as conbranças pagas em um periodo
+     * Se o parâmetro não for informado pegar o mês atual
+     * @since 2021-05-04
+     * @author Yan Menezes 
+     * @return Object
+     */
+    public function getCharges($url)
+    {
+
+        parse_str($url, $output);
+        $output = (object)$output;
+
+        if( $output->pesquisa == 'pgto'):
+            $output->createdOnStart = null;
+            $output->createdOnEnd = null;
+        else:
+            $output->paymentDateStart = null;
+            $output->paymentDateEnd = null;
+        endif;
+
+        $data = array(
+            'createdOnStart'    => $output->createdOnStart,
+            'createdOnEnd'      => $output->createdOnEnd,
+            'paymentDateStart'  => $output->paymentDateStart,
+            'paymentDateEnd'    => $output->paymentDateEnd,
+            'pageSize'          => $output->pageSize,
+            'showPaid'          => $output->pagos,
+            'page'              => $output->page,
+        );
+
+        $aCharges = $this->request( 'charges', 'GET', $data, true, 'url');
+
+        if( $aCharges->status ){
+            throw new Exception( $aCharges->details[0]->message );
+        }else{
+            return $aCharges;
+        }
+    }
+
 
     /**
      * Criar uma cobrança na forma de BOLETO.
@@ -347,38 +394,65 @@ class Juno{
      * Metod de execução da classe
      * @return Object
      */
-    private function request($url, $method, $data = null, $return = TRUE)
+    private function request($url, $method, $data = null, $return = TRUE, $type = 'json')
     {
         try{
-            $exec = curl_init();
-            if($data)
-                curl_setopt($exec, CURLOPT_POSTFIELDS, json_encode($data) );
+            if($data):
 
-            curl_setopt_array($exec,array(
-                CURLOPT_URL             => ( $this->sandbox ? Juno::SANDBOX : Juno::PROD ).$url,
-                CURLOPT_ENCODING        => "UTF-8",
-                CURLOPT_MAXREDIRS       => 2,
-                CURLOPT_POST            => TRUE,
-                CURLOPT_FOLLOWLOCATION  => TRUE,
-                CURLOPT_RETURNTRANSFER  => $return,
-                CURLOPT_HTTP_VERSION    => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST   => $method,
-                CURLOPT_HTTPHEADER      => array(
-                    'Authorization: Bearer '.$this->token_access,
-                    'X-Api-Version: 2' ,
-                    'X-Resource-Token: '.$this->token,
-                    'Content-Type: application/json'
-                )
-            )); 
+                if($type == 'url'):
+                    $e = ( $this->sandbox ? Juno::SANDBOX : Juno::PROD ).$url.'?'. http_build_query($data);
 
-            $response = curl_exec($exec);
-            $erro = curl_error($exec);
-            curl_close($exec);
+                    $exec = curl_init($e);
+                    curl_setopt_array($exec, array(
+                        CURLOPT_RETURNTRANSFER  => $return,
+                        CURLOPT_CUSTOMREQUEST   => $method,
+                        CURLOPT_HTTPHEADER  => array(
+                            'Authorization: Bearer '.$this->token_access,
+                            'X-Api-Version: 2' ,
+                            'X-Resource-Token: '.$this->token,
+                            'Content-Type: application/json'
+                        )
+                    ));
+                    $response = curl_exec($exec);
+                    $erro = curl_error($exec);
+                    curl_close($exec);
 
-            if($response == false)
-                throw new Exception('cURL Erro: '.$erro);
-            
-            return json_decode( $response );
+                    if($response == false)
+                        throw new Exception('cURL Erro: '.$erro);
+                    
+                    return json_decode( $response );
+                else:
+
+                    $exec = curl_init(); 
+                    curl_setopt($exec, CURLOPT_POSTFIELDS, json_encode($data) );
+                    curl_setopt_array($exec,array(
+                        CURLOPT_URL             => ( $this->sandbox ? Juno::SANDBOX : Juno::PROD ).$url,
+                        CURLOPT_ENCODING        => "UTF-8",
+                        CURLOPT_MAXREDIRS       => 2,
+                        CURLOPT_POST            => TRUE,
+                        CURLOPT_FOLLOWLOCATION  => TRUE,
+                        CURLOPT_RETURNTRANSFER  => $return,
+                        CURLOPT_HTTP_VERSION    => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_CUSTOMREQUEST   => $method,
+                        CURLOPT_HTTPHEADER      => array(
+                            'Authorization: Bearer '.$this->token_access,
+                            'X-Api-Version: 2' ,
+                            'X-Resource-Token: '.$this->token,
+                            'Content-Type: application/json'
+                        )
+                    )); 
+
+                    $response = curl_exec($exec);
+                    $erro = curl_error($exec);
+                    curl_close($exec);
+
+                    if($response == false)
+                        throw new Exception('cURL Erro: '.$erro);
+                    
+                    return json_decode( $response );
+
+                endif;
+            endif;
                 
         }catch(Exception $e){
            $this->exception($e);
