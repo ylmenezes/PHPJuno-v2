@@ -1,0 +1,9 @@
+version: '3.2'
+services:
+    apache:
+        build: .
+        container_name: juno
+        ports:
+            - "88:80"
+        volumes:
+            - .:/var/www/html
