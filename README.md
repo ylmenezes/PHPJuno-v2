@@ -41,7 +41,7 @@ ClientID | String ** | Informe o ClientID gerado no passo anterior
 ClientSecret | String ** |Informe o Secret gerado no passo anterior
 Sandbox | Boolean | O último parâmetro defini qual ambiente você está trabalhando. Para desenvolvimento usar `TRUE`. Valor padrão `FALSE`
 
-> __** Campos obrigátorios como parêmtros para a classe__
+> __** Campos obrigátorios como parâmetros para a classe__
 
 Código `config.php`: 
 
