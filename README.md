@@ -14,7 +14,11 @@ git add .
 git commit -m "Primeiro Commit"
 git push -u origin NOME_BRANCH
 ```
-**Todas as alterações devem ser feitas em sua branch e enviar ao repositório remoto**
+**Todas as alterações devem ser feitas em sua branch e enviar ao repositório QUA**
+
+## Branch QUA - Qualidade
+
+Este repositório será usado para receber as moficações das melhorias/correções, após devidos testes realizado o mesmo será mesclado com a master.
 
 ## Versionamento do Software
 
